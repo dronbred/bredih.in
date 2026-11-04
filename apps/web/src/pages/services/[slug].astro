@@ -2,6 +2,8 @@
 import Base from '../../layouts/Base.astro';
 import CaseCard from '../../components/CaseCard.astro';
 import CtaSection from '../../components/CtaSection.astro';
+import N8nTeaser from '../../components/N8nTeaser.astro';
+import { N8N_PARENT_SLUG } from '../../lib/n8n';
 import { getCases, getServices } from '../../lib/strapi';
 import type { Service } from '../../lib/types';
 import { breadcrumbs, faqPage, serviceSchema } from '../../lib/schema';
@@ -46,6 +48,12 @@ const schema = [serviceSchema(s), breadcrumbs([{ name: 'Услуги', path: '/s
           ))}
         </ul>
       </div>
+    </section>
+  )}
+
+  {s.slug === N8N_PARENT_SLUG && (
+    <section class="section-y pt-0">
+      <div class="container-x"><N8nTeaser /></div>
     </section>
   )}
 
