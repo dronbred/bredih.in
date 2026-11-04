@@ -1,0 +1,47 @@
+{
+  "kind": "collectionType",
+  "collectionName": "leads",
+  "info": {
+    "singularName": "lead",
+    "pluralName": "leads",
+    "displayName": "Заявка",
+    "description": "Заявки с сайта"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 120
+    },
+    "contact": {
+      "type": "string",
+      "required": true,
+      "maxLength": 200
+    },
+    "service": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "message": {
+      "type": "text",
+      "maxLength": 4000
+    },
+    "page": {
+      "type": "string",
+      "maxLength": 300
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "new",
+        "in_progress",
+        "done",
+        "spam"
+      ],
+      "default": "new"
+    }
+  }
+}

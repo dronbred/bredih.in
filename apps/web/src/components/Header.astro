@@ -1,0 +1,45 @@
+---
+interface Props { siteName: string; telegram: string }
+const { siteName, telegram } = Astro.props;
+const nav = [
+  { href: '/services/', label: 'Услуги' },
+  { href: '/cases/', label: 'Кейсы' },
+  { href: '/about/', label: 'Обо мне' },
+  { href: '/contacts/', label: 'Контакты' },
+];
+const path = Astro.url.pathname;
+---
+<header class="sticky top-0 z-50 border-b border-wire/60 bg-paper/90 backdrop-blur">
+  <div class="container-x flex h-16 items-center justify-between gap-4">
+    <a href="/" class="font-display text-[1.05rem] font-semibold tracking-tight">{siteName}</a>
+    <nav class="hidden items-center gap-7 md:flex" aria-label="Основное меню">
+      {nav.map((n) => (
+        <a href={n.href} aria-current={path.startsWith(n.href) ? 'page' : undefined}
+           class="font-medium text-ink-soft hover:text-ink aria-[current=page]:text-ink">{n.label}</a>
+      ))}
+      <a href={telegram} class="btn-primary !min-h-10 !px-5 !py-2" target="_blank" rel="noopener">Написать в Telegram</a>
+    </nav>
+    <button id="menu-btn" class="-mr-2 grid size-11 place-items-center rounded-full md:hidden" aria-label="Меню" aria-expanded="false" aria-controls="mobile-menu">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path class="l1" d="M3 7h16" /><path class="l2" d="M3 15h16" /></svg>
+    </button>
+  </div>
+  <nav id="mobile-menu" hidden class="border-t border-wire/60 bg-paper md:hidden" aria-label="Мобильное меню">
+    <div class="container-x flex flex-col pb-5 pt-2">
+      {nav.map((n) => <a href={n.href} class="border-b border-fog py-3.5 font-display text-xl">{n.label}</a>)}
+      <a href={telegram} class="btn-primary mt-5" target="_blank" rel="noopener">Написать в Telegram</a>
+    </div>
+  </nav>
+</header>
+<script>
+  const btn = document.getElementById('menu-btn')!;
+  const menu = document.getElementById('mobile-menu')!;
+  btn.addEventListener('click', () => {
+    menu.hidden = !menu.hidden;
+    btn.setAttribute('aria-expanded', String(!menu.hidden));
+  });
+</script>
+<style>
+  #menu-btn path { transition: transform .2s; transform-origin: center; }
+  #menu-btn[aria-expanded='true'] .l1 { transform: translateY(4px) rotate(45deg); }
+  #menu-btn[aria-expanded='true'] .l2 { transform: translateY(-4px) rotate(-45deg); }
+</style>

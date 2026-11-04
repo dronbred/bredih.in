@@ -1,0 +1,26 @@
+---
+// Услуги n8n карточками с обложкой: картинка, название, описание, цена и срок.
+import N8nCover from './N8nCover.astro';
+import type { N8nService } from '../lib/types';
+import { N8N_PATH, formatDuration, formatPrice } from '../lib/n8n';
+interface Props { services: N8nService[]; heading?: 'h3' | 'h4' }
+const { services, heading: H = 'h3' } = Astro.props;
+---
+<ul class="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+  {services.map((s) => (
+    <li>
+      <a href={`${N8N_PATH}${s.slug}/`} class="group flex h-full flex-col">
+        <div class="transition-transform duration-200 group-hover:-translate-y-1"><N8nCover service={s} /></div>
+        <H class="mt-5 text-[1.15rem] font-medium group-hover:text-signal-deep sm:text-[1.25rem]">{s.title}</H>
+        <p class="mt-2 text-[0.9375rem] text-ink-soft">{s.short}</p>
+        <p class="mt-auto flex flex-wrap gap-x-3 pt-4 text-[0.9375rem]">
+          {formatPrice(s) && <span class="font-semibold text-ink">{formatPrice(s)}</span>}
+          {formatDuration(s.duration) && <span class="text-ink-soft">{formatDuration(s.duration)}</span>}
+        </p>
+      </a>
+    </li>
+  ))}
+</ul>
+<style>
+  @media (prefers-reduced-motion: reduce) { a div { transition: none; transform: none !important; } }
+</style>

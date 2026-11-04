@@ -1,0 +1,28 @@
+---
+import Base from '../layouts/Base.astro';
+import CtaSection from '../components/CtaSection.astro';
+import { getAbout, getHome, mediaUrl } from '../lib/strapi';
+const [about, home] = await Promise.all([getAbout(), getHome()]);
+import { breadcrumbs, ids } from '../lib/schema';
+const photo = mediaUrl(about.photo?.url);
+const schema = [{ '@type': 'ProfilePage', mainEntity: { '@id': ids.person }, name: about.title }, breadcrumbs([{ name: about.title, path: '/about/' }])];
+---
+<Base title={about.title} description="Андрей Бредихин: разработчик, который автоматизирует процессы бизнеса и делает сайты, Telegram-ботов и приложения. Опыт, подход и инструменты." schema={schema} type="profile">
+  <section class="section-y">
+    <div class="container-x grid items-start gap-10 md:grid-cols-[1fr_1.4fr] lg:gap-16">
+      {photo
+        ? <img src={photo} alt="Андрей Бредихин" class="aspect-[4/5] w-full rounded-3xl object-cover" />
+        : <div class="grid aspect-[4/5] w-full place-items-center rounded-3xl bg-fog font-display text-6xl font-semibold text-wire" aria-hidden="true">АБ</div>}
+      <div>
+        <h1>{about.title}</h1>
+        <div class="measure mt-6 grid gap-4 text-lg">{about.text.split('\n').filter(Boolean).map((p) => <p>{p}</p>)}</div>
+        <dl class="mt-10 flex flex-wrap gap-x-10 gap-y-6 border-t-[1.5px] border-ink pt-6">
+          {about.facts.map((f) => <div><dd class="font-display text-4xl font-semibold tracking-tight">{f.value}</dd><dt class="mt-1 text-ink-soft">{f.label}</dt></div>)}
+        </dl>
+        <h2 class="mt-14 !text-xl">С чем работаю</h2>
+        <p class="mt-3 text-ink-soft">{home.technologies.join(', ')}.</p>
+      </div>
+    </div>
+  </section>
+  <CtaSection />
+</Base>

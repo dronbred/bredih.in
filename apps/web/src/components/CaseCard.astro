@@ -1,0 +1,22 @@
+---
+import type { Case } from '../lib/types';
+import { mediaUrl } from '../lib/strapi';
+interface Props { item: Case }
+const { item: c } = Astro.props;
+const cover = mediaUrl(c.cover?.url);
+const metric = c.metrics?.[0];
+---
+<a href={`/cases/${c.slug}/`} class="group flex h-full flex-col rounded-3xl bg-fog p-6 sm:p-7">
+  {cover && <img src={cover} alt={c.cover?.alternativeText ?? ''} loading="lazy" class="-mx-1 -mt-1 mb-6 aspect-[16/10] w-[calc(100%+0.5rem)] rounded-2xl object-cover" />}
+  {metric && (
+    <p class="mb-5">
+      <span class="block font-display text-[2.6rem] font-semibold leading-none tracking-tight text-done">{metric.value}</span>
+      <span class="mt-1 block text-[0.9375rem] text-ink-soft">{metric.label}</span>
+    </p>
+  )}
+  <h3 class="group-hover:text-signal-deep">{c.title}</h3>
+  <p class="mt-2 flex-1 text-[0.9375rem] text-ink-soft">{c.summary}</p>
+  {(c.client || c.stack?.length) && (
+    <p class="mt-5 text-sm text-ink-soft">{[c.client, c.stack?.join(', ')].filter(Boolean).join('. ')}</p>
+  )}
+</a>

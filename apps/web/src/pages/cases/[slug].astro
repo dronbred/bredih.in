@@ -1,0 +1,50 @@
+---
+import Base from '../../layouts/Base.astro';
+import CtaSection from '../../components/CtaSection.astro';
+import { getCases, mediaUrl } from '../../lib/strapi';
+import type { Case } from '../../lib/types';
+import { breadcrumbs, caseSchema } from '../../lib/schema';
+
+export async function getStaticPaths() {
+  const cases = await getCases();
+  return cases.map((item) => ({ params: { slug: item.slug }, props: { item } }));
+}
+const { item: c } = Astro.props as { item: Case };
+const cover = mediaUrl(c.cover?.url);
+const story = [
+  { title: 'Как было', text: c.task },
+  { title: 'Что сделал', text: c.solution },
+  { title: 'Что изменилось', text: c.result },
+].filter((b) => b.text);
+const schema = [caseSchema(c, cover), breadcrumbs([{ name: 'Кейсы', path: '/cases/' }, { name: c.title, path: `/cases/${c.slug}/` }])];
+---
+<Base title={c.seo?.metaTitle ?? c.title} description={c.seo?.metaDescription ?? c.summary} image={cover} schema={schema} type="article">
+  <article class="section-y">
+    <div class="container-x">
+      <nav aria-label="Навигация"><a href="/cases/" class="text-[0.9375rem] text-ink-soft hover:text-ink">Кейсы</a></nav>
+      <h1 class="mt-4 max-w-[20ch]">{c.title}</h1>
+      <p class="lede measure mt-6">{c.summary}</p>
+
+      {(c.metrics?.length ?? 0) > 0 && (
+        <dl class="mt-10 flex flex-wrap gap-x-12 gap-y-6 border-t-[1.5px] border-ink pt-6">
+          {c.metrics!.map((m) => <div><dd class="font-display text-[clamp(2.2rem,1.6rem+2.5vw,3.4rem)] font-semibold leading-none tracking-tight text-done">{m.value}</dd><dt class="mt-2 text-ink-soft">{m.label}</dt></div>)}
+        </dl>
+      )}
+
+      {cover && <img src={cover} alt={c.cover?.alternativeText ?? c.title} class="mt-12 w-full rounded-3xl" />}
+
+      {story.length > 0 && (
+        <div class="mt-14 grid gap-10 md:grid-cols-3 md:gap-8">
+          {story.map((b) => <section><h2 class="!text-xl">{b.title}</h2><p class="mt-3">{b.text}</p></section>)}
+        </div>
+      )}
+
+      <dl class="mt-14 grid gap-6 border-t-[1.5px] border-wire pt-6 sm:grid-cols-3">
+        {c.client && <div><dt class="text-[0.9375rem] text-ink-soft">Клиент</dt><dd class="mt-1 font-medium">{c.client}</dd></div>}
+        {(c.stack?.length ?? 0) > 0 && <div><dt class="text-[0.9375rem] text-ink-soft">Технологии</dt><dd class="mt-1 font-medium">{c.stack!.join(', ')}</dd></div>}
+        {c.link && <div><dt class="text-[0.9375rem] text-ink-soft">Проект</dt><dd class="mt-1"><a href={c.link} class="link" target="_blank" rel="noopener">Открыть</a></dd></div>}
+      </dl>
+    </div>
+  </article>
+  <CtaSection title="Нужно похожее решение?" selected={c.services?.[0]?.slug} />
+</Base>

@@ -1,0 +1,60 @@
+---
+import type { Service } from '../lib/types';
+interface Props { services: Service[]; selected?: string }
+const { services, selected } = Astro.props;
+const endpoint = `${(import.meta.env.PUBLIC_STRAPI_URL ?? '').replace(/\/$/, '')}/api/leads`;
+---
+<form id="lead-form" data-endpoint={endpoint} class="grid gap-4 rounded-3xl bg-paper p-5 text-ink sm:p-8">
+  <div class="grid gap-4 sm:grid-cols-2">
+    <label class="grid gap-1.5"><span class="text-sm font-medium">Как к вам обращаться</span>
+      <input name="name" required autocomplete="name" class="field" /></label>
+    <label class="grid gap-1.5"><span class="text-sm font-medium">Telegram, телефон или почта</span>
+      <input name="contact" required class="field" /></label>
+  </div>
+  <label class="grid gap-1.5"><span class="text-sm font-medium">Что нужно</span>
+    <select name="service" class="field">
+      <option value="">Пока не знаю, нужен совет</option>
+      {services.map((s) => <option value={s.slug} selected={s.slug === selected}>{s.title}</option>)}
+    </select></label>
+  <label class="grid gap-1.5"><span class="text-sm font-medium">Что сейчас отнимает время</span>
+    <textarea name="message" rows="4" class="field" placeholder="Например: менеджеры вручную переносят заявки с сайта в таблицу"></textarea></label>
+  <input type="text" name="website" class="hidden" tabindex="-1" autocomplete="off" aria-hidden="true" />
+  <label class="flex items-start gap-3 text-sm text-ink-soft">
+    <input type="checkbox" required class="mt-0.5 size-[1.125rem] shrink-0 accent-signal" />
+    <span>Согласен на обработку персональных данных по <a href="/privacy/" class="link">политике конфиденциальности</a></span>
+  </label>
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+    <button class="btn-primary" type="submit">Отправить заявку</button>
+    <p id="lead-status" class="text-sm" role="status"></p>
+  </div>
+</form>
+<script>
+  const form = document.getElementById('lead-form') as HTMLFormElement | null;
+  const status = document.getElementById('lead-status')!;
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(form)) as Record<string, string>;
+    if (data.website) return; // ловушка для спам-ботов
+    delete data.website;
+    const btn = form.querySelector('button')!;
+    btn.disabled = true;
+    btn.textContent = 'Отправляю…';
+    try {
+      const res = await fetch(form.dataset.endpoint!, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: { ...data, page: location.pathname } }),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      form.reset();
+      status.textContent = 'Заявка отправлена. Отвечу в течение рабочего дня.';
+      status.className = 'text-sm font-medium text-done';
+    } catch {
+      status.textContent = 'Заявка не ушла: нет связи с сервером. Напишите в Telegram, ссылка в шапке сайта.';
+      status.className = 'text-sm font-medium text-red-600';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Отправить заявку';
+    }
+  });
+</script>

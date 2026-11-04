@@ -1,0 +1,32 @@
+# Продакшн-окружение на одном VPS: Postgres + Strapi + Nginx со статикой сайта.
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME:-strapi}
+      POSTGRES_USER: ${DATABASE_USERNAME:-strapi}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:?задайте DATABASE_PASSWORD}
+    volumes: [db-data:/var/lib/postgresql/data]
+
+  cms:
+    build: ./apps/cms
+    restart: unless-stopped
+    env_file: ./apps/cms/.env
+    environment:
+      DATABASE_HOST: db
+    depends_on: [db]
+    volumes: [uploads:/app/public/uploads]
+
+  web:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports: ["80:80"]
+    volumes:
+      - ./apps/web/dist:/usr/share/nginx/html:ro
+      - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on: [cms]
+
+volumes:
+  db-data:
+  uploads:

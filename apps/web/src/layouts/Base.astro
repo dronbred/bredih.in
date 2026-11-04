@@ -1,0 +1,71 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { getGlobal, mediaUrl } from '../lib/strapi';
+import { abs, siteGraph } from '../lib/schema';
+// Шрифт заголовка первого экрана грузим заранее, чтобы ускорить LCP
+import displayFont from '@fontsource-variable/unbounded/files/unbounded-cyrillic-wght-normal.woff2?url';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  /** Дополнительные узлы JSON-LD для этой страницы */
+  schema?: Record<string, unknown>[];
+  /** Закрыть страницу от индексации */
+  noindex?: boolean;
+  type?: 'website' | 'article' | 'profile';
+}
+const g = await getGlobal();
+const { title, description = g.seo.metaDescription, image, schema = [], noindex = false, type = 'website' } = Astro.props;
+const fullTitle = title ? `${title} — ${g.siteName}` : (g.seo.metaTitle ?? g.siteName);
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = image ?? mediaUrl(g.seo.shareImage?.url) ?? abs('/og.png');
+const jsonLd = JSON.stringify({ '@context': 'https://schema.org', '@graph': [...siteGraph(g), ...schema] }, (_k, v) => (v === undefined ? undefined : v))
+  .replace(/</g, '\\u003c');
+const env = import.meta.env;
+---
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    {description && <meta name="description" content={description} />}
+    <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large, max-snippet:-1'} />
+    <link rel="canonical" href={canonical} />
+    <link rel="preload" href={displayFont} as="font" type="font/woff2" crossorigin />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="alternate" type="text/plain" title="llms.txt" href="/llms.txt" />
+    <meta name="author" content={g.siteName} />
+    <meta property="og:type" content={type} />
+    <meta property="og:site_name" content={g.siteName} />
+    <meta property="og:locale" content="ru_RU" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={fullTitle} />
+    {description && <meta property="og:description" content={description} />}
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:alt" content={fullTitle} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#17212b" />
+    {env.PUBLIC_YANDEX_VERIFICATION && <meta name="yandex-verification" content={env.PUBLIC_YANDEX_VERIFICATION} />}
+    {env.PUBLIC_GOOGLE_VERIFICATION && <meta name="google-site-verification" content={env.PUBLIC_GOOGLE_VERIFICATION} />}
+    <script type="application/ld+json" set:html={jsonLd} />
+    {env.PUBLIC_YANDEX_METRIKA_ID && (
+      <script is:inline define:vars={{ id: Number(env.PUBLIC_YANDEX_METRIKA_ID) }}>
+        (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();
+        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+        (window,document,'script','https://mc.yandex.ru/metrika/tag.js','ym');
+        ym(id,'init',{clickmap:true,trackLinks:true,accurateTrackBounce:true,webvisor:false});
+      </script>
+    )}
+  </head>
+  <body class="flex min-h-dvh flex-col">
+    <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-full focus:bg-ink focus:px-4 focus:py-2 focus:text-white">К содержимому</a>
+    <Header siteName={g.siteName} telegram={g.telegram} />
+    <main id="main" class="flex-1"><slot /></main>
+    <Footer global={g} />
+  </body>
+</html>

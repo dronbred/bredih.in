@@ -1,0 +1,43 @@
+---
+import Base from '../../layouts/Base.astro';
+import CaseCard from '../../components/CaseCard.astro';
+import CtaSection from '../../components/CtaSection.astro';
+import { getCases, getServices } from '../../lib/strapi';
+import { breadcrumbs } from '../../lib/schema';
+const [cases, services] = await Promise.all([getCases(), getServices()]);
+const schema = [breadcrumbs([{ name: 'Кейсы', path: '/cases/' }])];
+---
+<Base title="Кейсы" description="Кейсы по автоматизации, сайтам, Telegram-ботам и приложениям: задача, решение и результат в цифрах." schema={schema}>
+  <section class="section-y">
+    <div class="container-x">
+      <h1>Кейсы</h1>
+      <p class="lede measure mt-6">Что было до, что я сделал и что изменилось. Названия некоторых клиентов скрыты по их просьбе.</p>
+      <div class="-mx-4 mt-10 flex gap-2 overflow-x-auto px-4 pb-2 sm:mx-0 sm:flex-wrap sm:px-0" role="group" aria-label="Показать кейсы по услуге">
+        <button class="chip" data-filter="" aria-pressed="true">Все</button>
+        {services.map((s) => <button class="chip" data-filter={s.slug} aria-pressed="false">{s.title}</button>)}
+      </div>
+      <div class="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {cases.map((c) => <div data-services={(c.services ?? []).map((x) => x.slug).join(' ')}><CaseCard item={c} /></div>)}
+      </div>
+      <p id="cases-empty" hidden class="mt-6 text-ink-soft">По этой услуге кейсы ещё не опубликованы. Расскажите о задаче, покажу похожие проекты на созвоне.</p>
+    </div>
+  </section>
+  <CtaSection />
+</Base>
+<script>
+  const buttons = document.querySelectorAll<HTMLButtonElement>('.chip');
+  const items = document.querySelectorAll<HTMLElement>('[data-services]');
+  const empty = document.getElementById('cases-empty')!;
+  buttons.forEach((b) => b.addEventListener('click', () => {
+    const f = b.dataset.filter ?? '';
+    buttons.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    let shown = 0;
+    items.forEach((el) => { el.hidden = !!f && !el.dataset.services!.split(' ').includes(f); if (!el.hidden) shown++; });
+    empty.hidden = shown > 0;
+  }));
+</script>
+<style>
+  .chip { flex-shrink: 0; min-height: 2.5rem; padding: 0.45rem 1rem; border-radius: 999px; border: 1.5px solid var(--color-wire); font-weight: 500; white-space: nowrap; }
+  .chip:hover { border-color: var(--color-ink); }
+  .chip[aria-pressed='true'] { background: var(--color-ink); border-color: var(--color-ink); color: #fff; }
+</style>

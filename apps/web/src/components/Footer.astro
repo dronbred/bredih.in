@@ -1,0 +1,23 @@
+---
+import type { Global } from '../lib/types';
+interface Props { global: Global }
+const { global: g } = Astro.props;
+---
+<footer class="bg-ink text-white/70">
+  <div class="container-x grid gap-8 border-t border-white/10 py-10 sm:grid-cols-[1.4fr_1fr_1fr]">
+    <div>
+      <p class="font-display font-semibold text-white">{g.siteName}</p>
+      <p class="mt-2 max-w-xs text-[0.9375rem]">{g.tagline}</p>
+    </div>
+    <ul class="grid content-start gap-2 text-[0.9375rem]">
+      <li><a href={g.telegram} target="_blank" rel="noopener" class="hover:text-white">Telegram</a></li>
+      <li><a href={`mailto:${g.email}`} class="hover:text-white">{g.email}</a></li>
+      {g.phone && <li><a href={`tel:${g.phone.replace(/[^+\d]/g, '')}`} class="hover:text-white">{g.phone}</a></li>}
+      {g.socials?.filter((s) => s.label !== 'Telegram').map((s) => <li><a href={s.url} target="_blank" rel="noopener" class="hover:text-white">{s.label}</a></li>)}
+    </ul>
+    <div class="grid content-start gap-2 text-[0.9375rem]">
+      <a href="/privacy/" class="hover:text-white">Политика конфиденциальности</a>
+      <p>© {new Date().getFullYear()}</p>
+    </div>
+  </div>
+</footer>
