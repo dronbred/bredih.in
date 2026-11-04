@@ -3,6 +3,7 @@ import Base from '../../layouts/Base.astro';
 import CtaSection from '../../components/CtaSection.astro';
 import { getCases, mediaUrl } from '../../lib/strapi';
 import type { Case } from '../../lib/types';
+import { breadcrumbs, caseSchema } from '../../lib/schema';
 
 export async function getStaticPaths() {
   const cases = await getCases();
@@ -15,8 +16,9 @@ const story = [
   { title: 'Что сделал', text: c.solution },
   { title: 'Что изменилось', text: c.result },
 ].filter((b) => b.text);
+const schema = [caseSchema(c, cover), breadcrumbs([{ name: 'Кейсы', path: '/cases/' }, { name: c.title, path: `/cases/${c.slug}/` }])];
 ---
-<Base title={c.seo?.metaTitle ?? c.title} description={c.seo?.metaDescription ?? c.summary} image={cover}>
+<Base title={c.seo?.metaTitle ?? c.title} description={c.seo?.metaDescription ?? c.summary} image={cover} schema={schema} type="article">
   <article class="section-y">
     <div class="container-x">
       <nav aria-label="Навигация"><a href="/cases/" class="text-[0.9375rem] text-ink-soft hover:text-ink">Кейсы</a></nav>

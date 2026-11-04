@@ -2,9 +2,11 @@
 import Base from '../layouts/Base.astro';
 import ContactForm from '../components/ContactForm.astro';
 import { getGlobal, getServices } from '../lib/strapi';
+import { breadcrumbs, ids } from '../lib/schema';
 const [g, services] = await Promise.all([getGlobal(), getServices()]);
+const schema = [{ '@type': 'ContactPage', name: 'Контакты', about: { '@id': ids.business } }, breadcrumbs([{ name: 'Контакты', path: '/contacts/' }])];
 ---
-<Base title="Контакты">
+<Base title="Контакты" description="Как связаться с Андреем Бредихиным: Telegram, почта и форма заявки. Ответ в течение рабочего дня." schema={schema}>
   <section class="section-y bg-ink text-white">
     <div class="container-x grid gap-10 lg:grid-cols-[1fr_1.35fr]">
       <div>

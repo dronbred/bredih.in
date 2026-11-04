@@ -3,9 +3,11 @@ import Base from '../layouts/Base.astro';
 import CtaSection from '../components/CtaSection.astro';
 import { getAbout, getHome, mediaUrl } from '../lib/strapi';
 const [about, home] = await Promise.all([getAbout(), getHome()]);
+import { breadcrumbs, ids } from '../lib/schema';
 const photo = mediaUrl(about.photo?.url);
+const schema = [{ '@type': 'ProfilePage', mainEntity: { '@id': ids.person }, name: about.title }, breadcrumbs([{ name: about.title, path: '/about/' }])];
 ---
-<Base title={about.title}>
+<Base title={about.title} description="Андрей Бредихин: разработчик, который автоматизирует процессы бизнеса и делает сайты, Telegram-ботов и приложения. Опыт, подход и инструменты." schema={schema} type="profile">
   <section class="section-y">
     <div class="container-x grid items-start gap-10 md:grid-cols-[1fr_1.4fr] lg:gap-16">
       {photo

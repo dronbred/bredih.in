@@ -3,9 +3,14 @@ import Base from '../../layouts/Base.astro';
 import ServiceList from '../../components/ServiceList.astro';
 import CtaSection from '../../components/CtaSection.astro';
 import { getServices } from '../../lib/strapi';
+import { abs, breadcrumbs } from '../../lib/schema';
 const services = await getServices();
+const schema = [breadcrumbs([{ name: 'Услуги', path: '/services/' }]), {
+  '@type': 'ItemList', name: 'Услуги',
+  itemListElement: services.map((s, i) => ({ '@type': 'ListItem', position: i + 1, name: s.title, url: abs(`/services/${s.slug}/`) })),
+}];
 ---
-<Base title="Услуги" description="Автоматизация процессов, разработка сайтов, Telegram-ботов и приложений.">
+<Base title="Услуги" description="Автоматизация бизнес-процессов, разработка сайтов, Telegram-ботов и приложений под ключ. Цены, сроки и что входит в каждую услугу." schema={schema}>
   <section class="section-y">
     <div class="container-x">
       <h1 class="max-w-[18ch]">Услуги</h1>
