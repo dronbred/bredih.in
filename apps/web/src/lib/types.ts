@@ -25,3 +25,15 @@ export interface Home {
   steps: Item[]; technologies: string[];
 }
 export interface About { title: string; text: string; photo?: Media | null; facts: Metric[] }
+
+export type N8nCategory = 'setup' | 'integrations' | 'ai' | 'messaging' | 'support';
+export interface N8nService {
+  title: string; slug: string; category: N8nCategory; short: string; description?: string;
+  /** Стартовая цена в рублях */
+  price?: number; priceNote?: string;
+  /** Срок в рабочих днях */
+  duration?: number;
+  includes?: Item[]; deliverables?: Item[]; requirements?: Item[]; excludes?: Item[];
+  steps?: Item[]; faq?: Faq[]; seo?: Seo;
+}
+export interface N8nPage { title: string; intro?: string; benefits?: Item[]; steps?: Item[]; faq?: Faq[]; seo?: Seo }

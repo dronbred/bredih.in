@@ -1,14 +1,25 @@
 // Наполняет пустую базу демо-контентом: npm run seed
 const { createStrapi, compileStrapi } = require('@strapi/strapi');
 const data = require('./seed-data.json');
+const n8n = require('./seed-n8n.json');
 
 async function main() {
   const app = await createStrapi(await compileStrapi()).load();
   const docs = (uid) => app.documents(uid);
   const pub = { status: 'published' };
 
+  // Раздел «Автоматизация на n8n» заполняется отдельно, чтобы его можно было
+  // добавить и в уже наполненную базу.
+  if ((await docs('api::n8n-service.n8n-service').count()) === 0) {
+    await docs('api::n8n-page.n8n-page').create({ data: n8n.page });
+    for (const [i, s] of n8n.services.entries()) {
+      await docs('api::n8n-service.n8n-service').create({ data: { ...s, order: i }, ...pub });
+    }
+    console.log(`Услуги n8n загружены: ${n8n.services.length}.`);
+  }
+
   if ((await docs('api::service.service').count()) > 0) {
-    console.log('Контент уже есть, пропускаю.');
+    console.log('Основной контент уже есть, пропускаю.');
     return app.destroy();
   }
   await docs('api::global.global').create({ data: data.global });

@@ -1,0 +1,21 @@
+{
+  "kind": "singleType",
+  "collectionName": "n8n_pages",
+  "info": {
+    "singularName": "n8n-page",
+    "pluralName": "n8n-pages",
+    "displayName": "Страница «Автоматизация на n8n»",
+    "description": "Тексты главной страницы раздела услуг на n8n"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "title": { "type": "string", "required": true },
+    "intro": { "type": "text" },
+    "benefits": { "type": "component", "repeatable": true, "component": "shared.item" },
+    "steps": { "type": "component", "repeatable": true, "component": "shared.item" },
+    "faq": { "type": "component", "repeatable": true, "component": "shared.faq" },
+    "seo": { "type": "component", "repeatable": false, "component": "shared.seo" }
+  }
+}

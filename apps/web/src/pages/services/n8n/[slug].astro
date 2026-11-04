@@ -1,0 +1,137 @@
+---
+import Base from '../../../layouts/Base.astro';
+import N8nServiceList from '../../../components/N8nServiceList.astro';
+import CtaSection from '../../../components/CtaSection.astro';
+import { getGlobal, getN8nPage, getN8nServices } from '../../../lib/strapi';
+import type { Item, N8nService } from '../../../lib/types';
+import { N8N_PARENT_SLUG, N8N_PATH, formatDuration, formatPrice } from '../../../lib/n8n';
+import { breadcrumbs, faqPage, n8nServiceSchema } from '../../../lib/schema';
+
+export async function getStaticPaths() {
+  const services = await getN8nServices();
+  return services.map((service) => ({ params: { slug: service.slug }, props: { service, all: services } }));
+}
+const { service: s, all } = Astro.props as { service: N8nService; all: N8nService[] };
+const [g, page] = await Promise.all([getGlobal(), getN8nPage()]);
+const path = `${N8N_PATH}${s.slug}/`;
+const price = formatPrice(s);
+const duration = formatDuration(s.duration);
+const steps = s.steps?.length ? s.steps : page.steps ?? [];
+// Сначала услуги той же категории, затем остальные, не больше четырёх
+const related = [...all.filter((x) => x.slug !== s.slug && x.category === s.category), ...all.filter((x) => x.category !== s.category)].slice(0, 4);
+
+const blocks: { title: string; items?: Item[]; tone: 'done' | 'muted' }[] = [
+  { title: 'Что входит', items: s.includes, tone: 'done' },
+  { title: 'Что вы получите', items: s.deliverables, tone: 'done' },
+  { title: 'Что понадобится от вас', items: s.requirements, tone: 'muted' },
+  { title: 'Не входит в стоимость', items: s.excludes, tone: 'muted' },
+];
+const schema = [
+  n8nServiceSchema(s, path),
+  breadcrumbs([{ name: 'Услуги', path: '/services/' }, { name: page.title, path: N8N_PATH }, { name: s.title, path }]),
+  ...(s.faq?.length ? [faqPage(s.faq)] : []),
+];
+---
+<Base title={s.seo?.metaTitle ?? `${s.title} на n8n`} description={s.seo?.metaDescription ?? s.short} schema={schema}>
+  <section class="section-y pb-10 sm:pb-14">
+    <div class="container-x">
+      <nav aria-label="Навигация" class="flex flex-wrap gap-x-2 text-[0.9375rem] text-ink-soft">
+        <a href="/services/" class="hover:text-ink">Услуги</a>
+        <span aria-hidden="true">/</span>
+        <a href={N8N_PATH} class="hover:text-ink">{page.title}</a>
+      </nav>
+      <div class="mt-4 grid gap-10 lg:grid-cols-[1.6fr_1fr] lg:items-end">
+        <div>
+          <h1>{s.title}</h1>
+          <p class="lede measure mt-6">{s.description ?? s.short}</p>
+        </div>
+        <div class="border-t-[1.5px] border-ink pt-5">
+          <dl class="grid grid-cols-2 gap-6 lg:grid-cols-1 lg:gap-4">
+            {price && <div><dt class="text-[0.9375rem] text-ink-soft">Стоимость</dt><dd class="font-display text-2xl font-semibold">{price}</dd></div>}
+            {duration && <div><dt class="text-[0.9375rem] text-ink-soft">Срок</dt><dd class="font-display text-2xl font-semibold">{duration}</dd></div>}
+          </dl>
+          <div class="mt-6 flex flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row">
+            <a href={g.telegram} target="_blank" rel="noopener" class="btn-primary">Обсудить в Telegram</a>
+            <a href="#contact" class="btn-quiet">Оставить заявку</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pb-[clamp(3.5rem,2rem+5vw,6.5rem)]">
+    <div class="container-x grid gap-x-12 gap-y-12 md:grid-cols-2">
+      {blocks.filter((b) => b.items?.length).map((b) => (
+        <div>
+          <h2 class="text-[1.4rem] sm:text-[1.7rem]">{b.title}</h2>
+          <ul class="mt-5 border-t-[1.5px] border-ink">
+            {b.items!.map((f) => (
+              <li class="flex gap-3 border-b-[1.5px] border-wire py-4">
+                {b.tone === 'done'
+                  ? <svg class="mt-1 shrink-0 text-done" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3.5 9.5l3.5 3.5 7.5-8" /></svg>
+                  : <svg class="mt-1 shrink-0 text-ink-soft" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 9h10" /></svg>}
+                <span><b class="font-semibold">{f.title}</b>{f.text && <span class="mt-1 block text-ink-soft">{f.text}</span>}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  {steps.length > 0 && (
+    <section class="section-y bg-fog">
+      <div class="container-x">
+        <h2>Как проходит работа</h2>
+        <ol class={`steps mt-10 grid gap-8 sm:grid-cols-2 lg:gap-6 ${steps.length >= 5 ? 'lg:grid-cols-5' : 'lg:grid-cols-4'}`}>
+          {steps.map((st, i) => (
+            <li class="relative">
+              <span class="relative z-[1] grid size-10 place-items-center rounded-full border-[1.5px] border-ink bg-fog font-display text-sm font-semibold">{i + 1}</span>
+              <h3 class="mt-5">{st.title}</h3>
+              {st.text && <p class="mt-2 text-[0.9375rem] text-ink-soft">{st.text}</p>}
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  )}
+
+  {(s.faq?.length ?? 0) > 0 && (
+    <section class="section-y">
+      <div class="container-x grid gap-8 lg:grid-cols-[1fr_1.5fr]">
+        <h2>Частые вопросы</h2>
+        <div class="border-t-[1.5px] border-ink">
+          {s.faq!.map((q) => (
+            <details class="group border-b-[1.5px] border-wire">
+              <summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-5 font-semibold">
+                {q.question}
+                <svg class="shrink-0 transition-transform group-open:rotate-45" width="18" height="18" viewBox="0 0 18 18" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 3v12M3 9h12" /></svg>
+              </summary>
+              <p class="measure pb-5 text-ink-soft">{q.answer}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {related.length > 0 && (
+    <section class="section-y pt-0">
+      <div class="container-x">
+        <div class="flex flex-wrap items-baseline justify-between gap-4">
+          <h2>Другие услуги на n8n</h2>
+          <a href={N8N_PATH} class="link">Все услуги</a>
+        </div>
+        <div class="mt-8"><N8nServiceList services={related} /></div>
+      </div>
+    </section>
+  )}
+
+  <CtaSection selected={N8N_PARENT_SLUG} title="Обсудим вашу задачу" />
+</Base>
+
+<style>
+  @media (width >= 64rem) {
+    .steps li:not(:last-child)::after { content: ''; position: absolute; top: 1.2rem; left: 2.5rem; right: -1.5rem; height: 1.5px; background: var(--color-wire); }
+  }
+</style>

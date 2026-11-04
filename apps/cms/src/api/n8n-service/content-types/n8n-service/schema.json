@@ -1,0 +1,36 @@
+{
+  "kind": "collectionType",
+  "collectionName": "n8n_services",
+  "info": {
+    "singularName": "n8n-service",
+    "pluralName": "n8n-services",
+    "displayName": "Услуга n8n",
+    "description": "Отдельные услуги раздела «Автоматизация на n8n» с фиксированной ценой"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "title": { "type": "string", "required": true },
+    "slug": { "type": "uid", "targetField": "title", "required": true },
+    "order": { "type": "integer", "default": 0 },
+    "category": {
+      "type": "enumeration",
+      "enum": ["setup", "integrations", "ai", "messaging", "support"],
+      "default": "integrations",
+      "required": true
+    },
+    "short": { "type": "text", "required": true, "maxLength": 220 },
+    "description": { "type": "text" },
+    "price": { "type": "integer", "min": 0 },
+    "priceNote": { "type": "string" },
+    "duration": { "type": "integer", "min": 1 },
+    "includes": { "type": "component", "repeatable": true, "component": "shared.item" },
+    "deliverables": { "type": "component", "repeatable": true, "component": "shared.item" },
+    "requirements": { "type": "component", "repeatable": true, "component": "shared.item" },
+    "excludes": { "type": "component", "repeatable": true, "component": "shared.item" },
+    "steps": { "type": "component", "repeatable": true, "component": "shared.item" },
+    "faq": { "type": "component", "repeatable": true, "component": "shared.faq" },
+    "seo": { "type": "component", "repeatable": false, "component": "shared.seo" }
+  }
+}
