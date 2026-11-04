@@ -1,18 +1,16 @@
 ---
 import Base from '../../layouts/Base.astro';
-import ServiceCard from '../../components/ServiceCard.astro';
+import ServiceList from '../../components/ServiceList.astro';
 import CtaSection from '../../components/CtaSection.astro';
 import { getServices } from '../../lib/strapi';
 const services = await getServices();
 ---
 <Base title="Услуги" description="Автоматизация процессов, разработка сайтов, Telegram-ботов и приложений.">
-  <section class="section">
+  <section class="section-y">
     <div class="container-x">
-      <p class="eyebrow">Услуги</p>
-      <h1 class="mt-3">Решаю задачи бизнеса под ключ</h1>
-      <div class="mt-10 grid gap-5 sm:grid-cols-2">
-        {services.map((s) => <ServiceCard service={s} />)}
-      </div>
+      <h1 class="max-w-[18ch]">Услуги</h1>
+      <p class="lede measure mt-6">Беру задачу целиком: разбираюсь в процессе, предлагаю решение, делаю и поддерживаю. Цена «от» указана для небольшой задачи, точную назову после созвона.</p>
+      <div class="mt-12"><ServiceList services={services} /></div>
     </div>
   </section>
   <CtaSection />

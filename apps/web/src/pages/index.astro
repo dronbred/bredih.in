@@ -1,61 +1,60 @@
 ---
 import Base from '../layouts/Base.astro';
-import ServiceCard from '../components/ServiceCard.astro';
+import AutomationFlow from '../components/AutomationFlow.astro';
+import ServiceList from '../components/ServiceList.astro';
 import CaseCard from '../components/CaseCard.astro';
 import CtaSection from '../components/CtaSection.astro';
-import { getCases, getHome, getServices, getTestimonials } from '../lib/strapi';
+import { getCases, getGlobal, getHome, getServices, getTestimonials } from '../lib/strapi';
 
-const [home, services, cases, testimonials] = await Promise.all([getHome(), getServices(), getCases(), getTestimonials()]);
+const [g, home, services, cases, testimonials] = await Promise.all([getGlobal(), getHome(), getServices(), getCases(), getTestimonials()]);
 const featured = cases.filter((c) => c.featured).slice(0, 3);
 ---
 <Base>
-  <section class="section relative overflow-hidden">
-    <div class="pointer-events-none absolute -top-40 right-[-10%] size-[36rem] rounded-full bg-brand-100 blur-3xl" aria-hidden="true"></div>
-    <div class="container-x relative">
-      <p class="eyebrow">Автоматизация · Сайты · Боты · Приложения</p>
-      <h1 class="mt-4 max-w-4xl">{home.heroTitle}</h1>
-      <p class="mt-6 max-w-2xl text-lg text-muted sm:text-xl">{home.heroText}</p>
+  <section class="container-x grid items-center gap-10 pb-14 pt-10 sm:pt-14 lg:grid-cols-[1.15fr_1fr] lg:gap-14 lg:pb-24 lg:pt-20">
+    <div>
+      <h1 class="max-w-[14ch] lg:max-w-none">{home.heroTitle}</h1>
+      <p class="lede measure mt-6">{home.heroText}</p>
       <div class="mt-8 flex flex-col gap-3 sm:flex-row">
-        <a href="#contact" class="btn-primary">{home.heroCta}</a>
-        <a href="/cases/" class="btn-ghost">Смотреть кейсы</a>
+        <a href={g.telegram} target="_blank" rel="noopener" class="btn-primary">{home.heroCta}</a>
+        <a href="#contact" class="btn-quiet">Оставить заявку</a>
       </div>
     </div>
+    <AutomationFlow />
   </section>
 
-  <section class="section pt-0">
+  <section class="section-y pt-0">
     <div class="container-x">
-      <p class="eyebrow">Услуги</p>
-      <h2 class="mt-3">Чем могу помочь</h2>
-      <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {services.map((s) => <ServiceCard service={s} />)}
+      <div class="mb-8 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+        <h2>Чем могу помочь</h2>
+        <a href="/services/" class="link font-medium">Подробнее об услугах</a>
       </div>
+      <ServiceList services={services} />
     </div>
   </section>
 
   {featured.length > 0 && (
-    <section class="section bg-surface">
+    <section class="section-y pt-0">
       <div class="container-x">
-        <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-          <div><p class="eyebrow">Кейсы</p><h2 class="mt-3">Что уже сделано</h2></div>
-          <a href="/cases/" class="font-semibold text-brand-600">Все кейсы →</a>
+        <div class="mb-8 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+          <h2>Что уже работает у клиентов</h2>
+          <a href="/cases/" class="link font-medium">Все кейсы</a>
         </div>
-        <div class="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {featured.map((c) => <CaseCard item={c} />)}
         </div>
       </div>
     </section>
   )}
 
-  <section class="section">
+  <section class="section-y border-t-[1.5px] border-wire">
     <div class="container-x">
-      <p class="eyebrow">Процесс</p>
-      <h2 class="mt-3">Как я работаю</h2>
-      <ol class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <h2>Как проходит работа</h2>
+      <ol class="steps mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
         {home.steps.map((s, i) => (
-          <li class="rounded-2xl border border-line p-6">
-            <span class="text-sm font-bold text-brand-600">0{i + 1}</span>
-            <h3 class="mt-3">{s.title}</h3>
-            <p class="mt-2 text-muted">{s.text}</p>
+          <li class="relative">
+            <span class="relative z-[1] grid size-10 place-items-center rounded-full border-[1.5px] border-ink bg-paper font-display text-sm font-semibold">{i + 1}</span>
+            <h3 class="mt-5">{s.title}</h3>
+            <p class="mt-2 text-[0.9375rem] text-ink-soft">{s.text}</p>
           </li>
         ))}
       </ol>
@@ -63,15 +62,14 @@ const featured = cases.filter((c) => c.featured).slice(0, 3);
   </section>
 
   {testimonials.length > 0 && (
-    <section class="section bg-surface">
+    <section class="section-y bg-fog">
       <div class="container-x">
-        <p class="eyebrow">Отзывы</p>
-        <h2 class="mt-3">Что говорят клиенты</h2>
-        <div class="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        <h2>Отзывы</h2>
+        <div class="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {testimonials.map((t) => (
-            <figure class="rounded-2xl bg-white p-6">
+            <figure class="rounded-3xl bg-paper p-6">
               <blockquote class="text-lg">«{t.text}»</blockquote>
-              <figcaption class="mt-4"><b>{t.author}</b>{t.role && <span class="block text-sm text-muted">{t.role}</span>}</figcaption>
+              <figcaption class="mt-4 text-[0.9375rem]"><b>{t.author}</b>{t.role && <span class="block text-ink-soft">{t.role}</span>}</figcaption>
             </figure>
           ))}
         </div>
@@ -79,15 +77,21 @@ const featured = cases.filter((c) => c.featured).slice(0, 3);
     </section>
   )}
 
-  <section class="section">
-    <div class="container-x">
-      <p class="eyebrow">Технологии</p>
-      <h2 class="mt-3">Инструменты, с которыми работаю</h2>
-      <ul class="mt-8 flex flex-wrap gap-3">
-        {home.technologies.map((t) => <li class="rounded-full border border-line px-4 py-2 font-medium">{t}</li>)}
-      </ul>
+  <section class="section-y pt-0">
+    <div class="container-x grid gap-6 lg:grid-cols-[1fr_1.35fr]">
+      <h2>Инструменты</h2>
+      <div>
+        <p class="lede">Подбираю под задачу, а не под привычку. Чаще всего работаю с этим:</p>
+        <p class="mt-4 font-display text-lg leading-relaxed sm:text-xl">{home.technologies.join(', ')}.</p>
+      </div>
     </div>
   </section>
 
   <CtaSection />
 </Base>
+
+<style>
+  @media (width >= 64rem) {
+    .steps li:not(:last-child)::after { content: ''; position: absolute; top: 1.2rem; left: 2.5rem; right: -1.5rem; height: 1.5px; background: var(--color-wire); }
+  }
+</style>

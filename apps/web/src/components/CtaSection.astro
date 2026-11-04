@@ -1,16 +1,17 @@
 ---
 import ContactForm from './ContactForm.astro';
-import { getServices } from '../lib/strapi';
+import { getGlobal, getServices } from '../lib/strapi';
 interface Props { selected?: string; title?: string }
-const { selected, title = 'Расскажите о задаче' } = Astro.props;
-const services = await getServices();
+const { selected, title = 'Расскажите, что хотите автоматизировать' } = Astro.props;
+const [services, g] = await Promise.all([getServices(), getGlobal()]);
 ---
-<section id="contact" class="section bg-surface">
-  <div class="container-x grid gap-10 lg:grid-cols-[1fr_1.4fr] lg:items-start">
+<section id="contact" class="section-y bg-ink text-white">
+  <div class="container-x grid gap-10 lg:grid-cols-[1fr_1.35fr] lg:items-start">
     <div>
-      <p class="eyebrow">Заявка</p>
-      <h2 class="mt-3">{title}</h2>
-      <p class="mt-4 text-lg text-muted">Отвечу в течение дня, предложу решение и примерную оценку. Консультация бесплатная.</p>
+      <h2>{title}</h2>
+      <p class="mt-5 max-w-md text-lg text-white/70">Отвечу в течение рабочего дня: предложу решение, сроки и примерную стоимость. Первая консультация бесплатная.</p>
+      <p class="mt-8 text-white/70">Быстрее всего в Telegram:</p>
+      <a href={g.telegram} target="_blank" rel="noopener" class="btn-light mt-3">Написать в Telegram</a>
     </div>
     <ContactForm services={services} selected={selected} />
   </div>
