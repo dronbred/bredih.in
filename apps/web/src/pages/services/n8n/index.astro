@@ -1,8 +1,8 @@
 ---
 import Base from '../../../layouts/Base.astro';
-import N8nServiceList from '../../../components/N8nServiceList.astro';
+import N8nServiceCards from '../../../components/N8nServiceCards.astro';
 import CtaSection from '../../../components/CtaSection.astro';
-import { getN8nPage, getN8nServices } from '../../../lib/strapi';
+import { getN8nPage, getN8nServices, mediaUrl } from '../../../lib/strapi';
 import { N8N_PARENT_SLUG, N8N_PATH, groupByCategory } from '../../../lib/n8n';
 import { abs, breadcrumbs, faqPage, ids } from '../../../lib/schema';
 
@@ -26,7 +26,7 @@ const schema = [
       itemListElement: g.items.map((s) => ({
         '@type': 'Offer', url: abs(`${N8N_PATH}${s.slug}/`), priceCurrency: 'RUB',
         priceSpecification: s.price != null ? { '@type': 'PriceSpecification', minPrice: s.price, priceCurrency: 'RUB' } : undefined,
-        itemOffered: { '@type': 'Service', name: s.title, description: s.short, url: abs(`${N8N_PATH}${s.slug}/`) },
+        itemOffered: { '@type': 'Service', name: s.title, description: s.short, url: abs(`${N8N_PATH}${s.slug}/`), image: mediaUrl(s.cover?.url) },
       })),
     })),
   },
@@ -72,7 +72,7 @@ const schema = [
       {groups.map((g) => (
         <div id={g.id} class="scroll-mt-24">
           <h2 class="text-[1.4rem] sm:text-[1.8rem]">{g.label}</h2>
-          <div class="mt-6"><N8nServiceList services={g.items} /></div>
+          <div class="mt-6 border-t-[1.5px] border-ink pt-8"><N8nServiceCards services={g.items} /></div>
         </div>
       ))}
     </div>

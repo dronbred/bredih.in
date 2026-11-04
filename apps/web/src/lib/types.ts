@@ -29,6 +29,10 @@ export interface About { title: string; text: string; photo?: Media | null; fact
 export type N8nCategory = 'setup' | 'integrations' | 'ai' | 'messaging' | 'support';
 export interface N8nService {
   title: string; slug: string; category: N8nCategory; short: string; description?: string;
+  /** Своя картинка из Strapi; если её нет, рисуется схема из flow */
+  cover?: Media | null;
+  /** Шаги схемы-иллюстрации: иконка и подпись */
+  flow?: { icon: string; label: string }[] | null;
   /** Стартовая цена в рублях */
   price?: number; priceNote?: string;
   /** Срок в рабочих днях */
