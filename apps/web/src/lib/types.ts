@@ -41,3 +41,10 @@ export interface N8nService {
   steps?: Item[]; faq?: Faq[]; seo?: Seo;
 }
 export interface N8nPage { title: string; intro?: string; benefits?: Item[]; steps?: Item[]; faq?: Faq[]; seo?: Seo }
+
+/** Сценарий для живой схемы автоматизации на первом экране главной */
+export interface FlowScenario {
+  title: string;
+  steps: { title: string; detail?: string | null; time?: string | null }[];
+  caption?: string | null;
+}

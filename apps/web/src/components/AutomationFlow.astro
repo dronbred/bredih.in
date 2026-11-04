@@ -1,27 +1,40 @@
 ---
 // Живая схема автоматизации на первом экране: шаги выполняются по очереди, как сценарий.
-const steps = [
-  { title: 'Новая заявка в Telegram-боте', detail: 'Ирина, ремонт кухни, бюджет до 400 000 ₽', time: '10:42:01' },
-  { title: 'Сделка создана в CRM', detail: 'Сделка № 1842, этап «Новая заявка»', time: '10:42:02' },
-  { title: 'Строка добавлена в отчёт', detail: 'Google Таблица «Заявки, ноябрь», источник: бот', time: '10:42:03' },
-  { title: 'Менеджер получил задачу', detail: 'Перезвонить Ирине до 11:00', time: '10:42:04' },
-];
+// Сценарии берутся из Strapi («Сценарий на главной»). В HTML попадают все,
+// а при каждой загрузке страницы браузер показывает один случайный.
+import { getFlowScenarios } from '../lib/strapi';
+
+const scenarios = await getFlowScenarios();
 ---
-<figure class="flow" data-step="4" aria-label="Пример автоматизации: заявка из Telegram-бота сама попадает в CRM, отчёт и задачу менеджеру">
-  <ol class="flow-list">
-    {steps.map((s, i) => (
-      <li class="flow-step" style={`--i:${i}`}>
-        <span class="flow-node" aria-hidden="true"></span>
-        <div class="min-w-0">
-          <p class="flow-title">{s.title}</p>
-          <p class="flow-detail">{s.detail}</p>
-        </div>
-        <time class="flow-time">{s.time}</time>
-      </li>
-    ))}
-  </ol>
-  <figcaption class="flow-caption">Четыре действия за четыре секунды. Никто из сотрудников ничего не копировал.</figcaption>
+<figure class="flow" aria-label={`Пример автоматизации: ${scenarios[0].title}`}>
+  {scenarios.map((sc, n) => (
+    <div class="flow-scene" data-label={sc.title} hidden={n !== 0}>
+      <ol class="flow-list">
+        {sc.steps.map((s, i) => (
+          <li class="flow-step" data-state="done">
+            <span class="flow-node" aria-hidden="true"></span>
+            <div class="min-w-0">
+              <p class="flow-title">{s.title}</p>
+              {s.detail && <p class="flow-detail">{s.detail}</p>}
+            </div>
+            {s.time && <time class="flow-time">{s.time}</time>}
+          </li>
+        ))}
+      </ol>
+      {sc.caption && <p class="flow-caption">{sc.caption}</p>}
+    </div>
+  ))}
 </figure>
+<script is:inline>
+  // Выбираем сценарий сразу, ещё до отрисовки, чтобы не было мигания.
+  (() => {
+    const flow = document.currentScript.previousElementSibling;
+    const scenes = flow.querySelectorAll('.flow-scene');
+    const pick = Math.floor(Math.random() * scenes.length);
+    scenes.forEach((el, k) => { el.hidden = k !== pick; });
+    flow.setAttribute('aria-label', 'Пример автоматизации: ' + scenes[pick].dataset.label);
+  })();
+</script>
 
 <style>
   .flow { position: relative; border-radius: 24px; background: var(--color-fog); padding: clamp(1.25rem, 0.8rem + 2vw, 2rem); }
@@ -33,43 +46,42 @@ const steps = [
     background: var(--color-paper); border: 2px solid var(--color-wire); transition: background-color .3s, border-color .3s, box-shadow .3s; }
   .flow-title { font-weight: 600; line-height: 1.35; }
   .flow-detail { margin-top: 0.15rem; font-size: 0.9375rem; color: var(--color-ink-soft); line-height: 1.4; }
-  .flow-time { margin-top: 0.2rem; font-size: 0.8125rem; color: var(--color-ink-soft); font-variant-numeric: tabular-nums; }
-  .flow-caption { margin-top: 1.25rem; padding-top: 1rem; border-top: 1.5px solid var(--color-wire); font-size: 0.9375rem; color: var(--color-ink-soft); }
+  .flow-time { margin-top: 0.2rem; font-size: 0.8125rem; color: var(--color-ink-soft); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .flow-caption { margin-top: 1.25rem; padding-top: 1rem; border-top: 1.5px solid var(--color-wire); font-size: 0.9375rem; color: var(--color-ink-soft);
+    transition: opacity .4s; }
 
-  /* Состояния: шаги до текущего выполнены, текущий активен, следующие ждут */
-  .flow-step { opacity: var(--o, 1); }
-  .flow[data-step='0'] .flow-step:nth-child(n+1),
-  .flow[data-step='1'] .flow-step:nth-child(n+2),
-  .flow[data-step='2'] .flow-step:nth-child(n+3),
-  .flow[data-step='3'] .flow-step:nth-child(n+4) { --o: 0.35; }
-  .flow[data-step='1'] .flow-step:nth-child(-n+1) .flow-node,
-  .flow[data-step='2'] .flow-step:nth-child(-n+2) .flow-node,
-  .flow[data-step='3'] .flow-step:nth-child(-n+3) .flow-node,
-  .flow[data-step='4'] .flow-step .flow-node { background: var(--color-done); border-color: var(--color-done); }
-  .flow[data-step='0'] .flow-step:nth-child(1) .flow-node,
-  .flow[data-step='1'] .flow-step:nth-child(2) .flow-node,
-  .flow[data-step='2'] .flow-step:nth-child(3) .flow-node,
-  .flow[data-step='3'] .flow-step:nth-child(4) .flow-node { border-color: var(--color-signal); box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-signal) 22%, transparent); }
-  .flow-caption { transition: opacity .4s; }
-  .flow:not([data-step='4']) .flow-caption { opacity: 0; }
+  /* Состояния шага: выполнен, выполняется, ждёт своей очереди */
+  .flow-step[data-state='wait'] { opacity: 0.35; }
+  .flow-step[data-state='done'] .flow-node { background: var(--color-done); border-color: var(--color-done); }
+  .flow-step[data-state='active'] .flow-node { border-color: var(--color-signal); box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-signal) 22%, transparent); }
+  /* Подпись появляется, когда сценарий дошёл до конца */
+  .flow[data-running] .flow-caption { opacity: 0; }
 </style>
 
 <script>
   const flow = document.querySelector<HTMLElement>('.flow');
+  const scene = flow?.querySelector<HTMLElement>('.flow-scene:not([hidden])');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (flow && !reduce) {
+  if (flow && scene && !reduce) {
+    const steps = [...scene.querySelectorAll<HTMLElement>('.flow-step')];
+    const total = steps.length;
+    // step = сколько шагов уже выполнено; при step === total сценарий завершён
+    const render = (step: number) => {
+      steps.forEach((el, i) => { el.dataset.state = i < step ? 'done' : i === step ? 'active' : 'wait'; });
+      if (step < total) flow.dataset.running = ''; else delete flow.dataset.running;
+    };
     let step = 0;
+    let timer = 0;
     const tick = () => {
-      flow.dataset.step = String(step);
-      const delay = step === 4 ? 4200 : step === 0 ? 900 : 1100;
-      step = step === 4 ? 0 : step + 1;
+      render(step);
+      const delay = step === total ? 4200 : step === 0 ? 900 : 1100;
+      step = step === total ? 0 : step + 1;
       timer = window.setTimeout(tick, delay);
     };
-    let timer = 0;
     // Запускаем, только когда схема видна, и останавливаем, когда уходит с экрана
     new IntersectionObserver(([e]) => {
       clearTimeout(timer);
-      if (e.isIntersecting) { step = 0; tick(); } else { flow.dataset.step = '4'; }
+      if (e.isIntersecting) { step = 0; tick(); } else { render(total); }
     }).observe(flow);
   }
 </script>
