@@ -2,11 +2,15 @@
 import Base from '../layouts/Base.astro';
 ---
 <Base title="Страница не найдена">
-  <section class="section">
-    <div class="container-x text-center">
-      <p class="text-7xl font-extrabold text-brand-600">404</p>
-      <h1 class="mt-4 !text-3xl">Такой страницы нет</h1>
-      <a href="/" class="btn-primary mt-8">На главную</a>
+  <section class="section-y">
+    <div class="container-x">
+      <p class="font-display text-[clamp(4rem,3rem+6vw,8rem)] font-semibold leading-none text-wire">404</p>
+      <h1 class="mt-6 !text-3xl">Такой страницы нет</h1>
+      <p class="lede mt-4">Возможно, ссылка устарела. Начните с главной или посмотрите услуги.</p>
+      <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+        <a href="/" class="btn-primary">На главную</a>
+        <a href="/services/" class="btn-quiet">Услуги</a>
+      </div>
     </div>
   </section>
 </Base>

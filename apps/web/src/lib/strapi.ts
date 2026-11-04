@@ -44,6 +44,5 @@ export async function getCases(): Promise<Case[]> {
   return nonEmpty(list) ? list : fb.cases;
 }
 export async function getTestimonials(): Promise<Testimonial[]> {
-  const list = await get<Testimonial[]>('testimonials?populate=*');
-  return nonEmpty(list) ? list : fb.testimonials;
+  return (await get<Testimonial[]>('testimonials?populate=*')) ?? fb.testimonials;
 }

@@ -10,55 +10,64 @@ export async function getStaticPaths() {
   return services.map((service) => ({ params: { slug: service.slug }, props: { service } }));
 }
 const { service: s } = Astro.props as { service: Service };
-const related = (s.cases?.length ? s.cases : (await getCases()).filter((c) => c.services?.some((x) => x.slug === s.slug)));
+const related = s.cases?.length ? s.cases : (await getCases()).filter((c) => c.services?.some((x) => x.slug === s.slug));
 ---
 <Base title={s.seo?.metaTitle ?? s.title} description={s.seo?.metaDescription ?? s.short}>
-  <section class="section">
-    <div class="container-x grid gap-10 lg:grid-cols-[1.5fr_1fr]">
-      <div>
-        <a href="/services/" class="text-sm text-muted hover:text-brand-600">← Все услуги</a>
-        <h1 class="mt-4">{s.title}</h1>
-        <p class="mt-6 text-lg text-muted">{s.description ?? s.short}</p>
+  <section class="section-y">
+    <div class="container-x">
+      <nav aria-label="Навигация"><a href="/services/" class="text-[0.9375rem] text-ink-soft hover:text-ink">Услуги</a></nav>
+      <div class="mt-4 grid gap-10 lg:grid-cols-[1.5fr_1fr] lg:items-end">
+        <div>
+          <h1>{s.title}</h1>
+          <p class="lede measure mt-6">{s.description ?? s.short}</p>
+        </div>
+        {(s.priceFrom || s.duration) && (
+          <dl class="grid grid-cols-2 gap-6 border-t-[1.5px] border-ink pt-5 lg:grid-cols-1">
+            {s.priceFrom && <div><dt class="text-[0.9375rem] text-ink-soft">Стоимость</dt><dd class="font-display text-2xl font-semibold">{s.priceFrom}</dd></div>}
+            {s.duration && <div><dt class="text-[0.9375rem] text-ink-soft">Срок</dt><dd class="font-display text-2xl font-semibold">{s.duration}</dd></div>}
+          </dl>
+        )}
       </div>
-      {(s.priceFrom || s.duration) && (
-        <aside class="h-fit rounded-2xl border border-line bg-surface p-6">
-          {s.priceFrom && <p><span class="text-sm text-muted">Стоимость</span><br /><b class="text-2xl">{s.priceFrom}</b></p>}
-          {s.duration && <p class="mt-4"><span class="text-sm text-muted">Срок</span><br /><b class="text-xl">{s.duration}</b></p>}
-          <a href="#contact" class="btn-primary mt-6 w-full">Обсудить задачу</a>
-        </aside>
-      )}
     </div>
   </section>
 
   {(s.features?.length ?? 0) > 0 && (
-    <section class="section pt-0">
-      <div class="container-x">
+    <section class="section-y pt-0">
+      <div class="container-x grid gap-8 lg:grid-cols-[1fr_1.5fr]">
         <h2>Что входит</h2>
-        <ul class="mt-8 grid gap-4 sm:grid-cols-2">
-          {s.features.map((f) => <li class="rounded-2xl border border-line p-5"><b>✓ {f.title}</b>{f.text && <p class="mt-1 text-muted">{f.text}</p>}</li>)}
+        <ul class="grid gap-x-8 sm:grid-cols-2">
+          {s.features!.map((f) => (
+            <li class="flex gap-3 border-b-[1.5px] border-wire py-4">
+              <svg class="mt-1 shrink-0 text-done" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3.5 9.5l3.5 3.5 7.5-8" /></svg>
+              <span><b class="font-semibold">{f.title}</b>{f.text && <span class="mt-1 block text-ink-soft">{f.text}</span>}</span>
+            </li>
+          ))}
         </ul>
       </div>
     </section>
   )}
 
   {related.length > 0 && (
-    <section class="section bg-surface">
+    <section class="section-y pt-0">
       <div class="container-x">
-        <h2>Кейсы</h2>
-        <div class="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">{related.map((c) => <CaseCard item={c} />)}</div>
+        <h2>Примеры</h2>
+        <div class="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">{related.map((c) => <CaseCard item={c} />)}</div>
       </div>
     </section>
   )}
 
   {(s.faq?.length ?? 0) > 0 && (
-    <section class="section">
-      <div class="container-x max-w-3xl">
+    <section class="section-y pt-0">
+      <div class="container-x grid gap-8 lg:grid-cols-[1fr_1.5fr]">
         <h2>Частые вопросы</h2>
-        <div class="mt-8 divide-y divide-line border-y border-line">
-          {s.faq.map((q) => (
-            <details class="group py-5">
-              <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold">{q.question}<span class="transition group-open:rotate-45">+</span></summary>
-              <p class="mt-3 text-muted">{q.answer}</p>
+        <div class="border-t-[1.5px] border-ink">
+          {s.faq!.map((q) => (
+            <details class="group border-b-[1.5px] border-wire">
+              <summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-5 font-semibold">
+                {q.question}
+                <svg class="shrink-0 transition-transform group-open:rotate-45" width="18" height="18" viewBox="0 0 18 18" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 3v12M3 9h12" /></svg>
+              </summary>
+              <p class="measure pb-5 text-ink-soft">{q.answer}</p>
             </details>
           ))}
         </div>
@@ -66,5 +75,5 @@ const related = (s.cases?.length ? s.cases : (await getCases()).filter((c) => c.
     </section>
   )}
 
-  <CtaSection selected={s.slug} />
+  <CtaSection selected={s.slug} title="Обсудим вашу задачу" />
 </Base>

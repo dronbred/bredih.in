@@ -1,0 +1,22 @@
+---
+// Услуги строками-индексом: название, чем помогаю, срок и цена.
+import type { Service } from '../lib/types';
+interface Props { services: Service[] }
+const { services } = Astro.props;
+---
+<ul class="border-t-[1.5px] border-ink">
+  {services.map((s) => (
+    <li class="border-b-[1.5px] border-wire">
+      <a href={`/services/${s.slug}/`} class="group grid gap-x-8 gap-y-2 py-6 sm:py-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)_11rem] md:items-baseline">
+        <h3 class="text-[1.35rem] font-medium group-hover:text-signal-deep sm:text-[1.6rem]">{s.title}</h3>
+        <p class="text-ink-soft">{s.short}</p>
+        {(s.priceFrom || s.duration) && (
+          <p class="text-[0.9375rem] md:text-right">
+            {s.priceFrom && <span class="font-semibold text-ink">{s.priceFrom}</span>}
+            {s.duration && <span class="block text-ink-soft">{s.duration}</span>}
+          </p>
+        )}
+      </a>
+    </li>
+  ))}
+</ul>
