@@ -8,6 +8,7 @@ const PUBLIC_PERMISSIONS: Record<string, string[]> = {
   'api::service.service': ['find', 'findOne'],
   'api::n8n-service.n8n-service': ['find', 'findOne'],
   'api::n8n-page.n8n-page': ['find'],
+  'api::flow-scenario.flow-scenario': ['find'],
   'api::case.case': ['find', 'findOne'],
   'api::testimonial.testimonial': ['find', 'findOne'],
   'api::article.article': ['find', 'findOne'],

@@ -2,6 +2,7 @@
 const { createStrapi, compileStrapi } = require('@strapi/strapi');
 const data = require('./seed-data.json');
 const n8n = require('./seed-n8n.json');
+const flows = require('./seed-flows.json');
 
 async function main() {
   const app = await createStrapi(await compileStrapi()).load();
@@ -16,6 +17,14 @@ async function main() {
       await docs('api::n8n-service.n8n-service').create({ data: { ...s, order: i }, ...pub });
     }
     console.log(`Услуги n8n загружены: ${n8n.services.length}.`);
+  }
+
+  // Сценарии для схемы на первом экране главной: показывается случайный.
+  if ((await docs('api::flow-scenario.flow-scenario').count()) === 0) {
+    for (const [i, f] of flows.entries()) {
+      await docs('api::flow-scenario.flow-scenario').create({ data: { ...f, order: i }, ...pub });
+    }
+    console.log(`Сценарии автоматизации загружены: ${flows.length}.`);
   }
 
   if ((await docs('api::service.service').count()) > 0) {

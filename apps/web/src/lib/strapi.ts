@@ -2,7 +2,8 @@
 // чтобы сайт собирался и в разработке, и до наполнения админки.
 import * as fb from './fallback';
 import n8nSeed from '../../../cms/scripts/seed-n8n.json';
-import type { About, Case, Global, Home, N8nPage, N8nService, Service, Testimonial } from './types';
+import flowSeed from '../../../cms/scripts/seed-flows.json';
+import type { About, Case, FlowScenario, Global, Home, N8nPage, N8nService, Service, Testimonial } from './types';
 
 const BASE = (import.meta.env.STRAPI_URL ?? '').replace(/\/$/, '');
 const TOKEN = import.meta.env.STRAPI_TOKEN;
@@ -57,4 +58,11 @@ export async function getN8nPage(): Promise<N8nPage> {
 export async function getN8nServices(): Promise<N8nService[]> {
   const list = await get<N8nService[]>('n8n-services?populate=*&sort=order:asc&pagination[pageSize]=100');
   return nonEmpty(list) ? list : n8nFallback.services;
+}
+
+/** Сценарии для схемы на первом экране главной. Случайный выбирается в браузере. */
+export async function getFlowScenarios(): Promise<FlowScenario[]> {
+  const list = await get<FlowScenario[]>('flow-scenarios?populate=*&sort=order:asc&pagination[pageSize]=50');
+  const usable = (list ?? []).filter((f) => f.steps?.length >= 2);
+  return usable.length > 0 ? usable : (flowSeed as FlowScenario[]);
 }
