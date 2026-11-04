@@ -1,0 +1,15 @@
+---
+// Ссылка на раздел готовых услуг на n8n со списка услуг и страницы автоматизации.
+import { getN8nServices } from '../lib/strapi';
+import { N8N_PATH } from '../lib/n8n';
+const services = await getN8nServices();
+const minPrice = Math.min(...services.map((s) => s.price ?? Infinity));
+const rub = new Intl.NumberFormat('ru-RU');
+---
+<a href={N8N_PATH} class="group grid gap-6 rounded-3xl bg-fog p-6 transition-colors hover:bg-[#e4eaf0] sm:p-8 md:grid-cols-[1fr_auto] md:items-center">
+  <div>
+    <h2 class="text-[1.4rem] sm:text-[1.8rem] group-hover:text-signal-deep">Автоматизация на n8n</h2>
+    <p class="measure mt-3 text-ink-soft">{services.length} готовых услуг с понятной ценой и сроком: установка n8n, интеграции CRM и 1С, AI-обработка заявок, боты, рассылки и перенос из Make и Zapier.</p>
+  </div>
+  <span class="btn-primary justify-self-start">{Number.isFinite(minPrice) ? `Смотреть услуги от ${rub.format(minPrice)} ₽` : 'Смотреть услуги'}</span>
+</a>

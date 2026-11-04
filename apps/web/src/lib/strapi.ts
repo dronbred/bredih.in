@@ -1,7 +1,8 @@
 // Клиент Strapi 5 (REST). Если CMS недоступна или пуста, отдаёт демо-контент,
 // чтобы сайт собирался и в разработке, и до наполнения админки.
 import * as fb from './fallback';
-import type { About, Case, Global, Home, Service, Testimonial } from './types';
+import n8nSeed from '../../../cms/scripts/seed-n8n.json';
+import type { About, Case, Global, Home, N8nPage, N8nService, Service, Testimonial } from './types';
 
 const BASE = (import.meta.env.STRAPI_URL ?? '').replace(/\/$/, '');
 const TOKEN = import.meta.env.STRAPI_TOKEN;
@@ -45,4 +46,15 @@ export async function getCases(): Promise<Case[]> {
 }
 export async function getTestimonials(): Promise<Testimonial[]> {
   return (await get<Testimonial[]>('testimonials?populate=*')) ?? fb.testimonials;
+}
+
+// Демо-контент раздела n8n берём из того же файла, которым наполняется Strapi.
+const n8nFallback = n8nSeed as unknown as { page: N8nPage; services: N8nService[] };
+
+export async function getN8nPage(): Promise<N8nPage> {
+  return (await get<N8nPage>('n8n-page?populate=*')) ?? n8nFallback.page;
+}
+export async function getN8nServices(): Promise<N8nService[]> {
+  const list = await get<N8nService[]>('n8n-services?populate=*&sort=order:asc&pagination[pageSize]=100');
+  return nonEmpty(list) ? list : n8nFallback.services;
 }

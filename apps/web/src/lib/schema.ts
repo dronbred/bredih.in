@@ -1,5 +1,5 @@
 // Разметка Schema.org (JSON-LD) для поисковиков и AI-ассистентов.
-import type { Case, Faq, Global, Service } from './types';
+import type { Case, Faq, Global, N8nService, Service } from './types';
 
 const site = (import.meta.env.SITE_URL ?? 'https://bredih.in').replace(/\/$/, '');
 export const abs = (path: string) => `${site}${path}`;
@@ -73,5 +73,17 @@ export function caseSchema(c: Case, image?: string) {
     text: [c.task, c.solution, c.result].filter(Boolean).join(' '),
     author: { '@id': ids.person }, keywords: c.stack?.join(', '),
     about: c.services?.map((s) => ({ '@type': 'Service', name: s.title, url: abs(`/services/${s.slug}/`) })),
+  };
+}
+
+export function n8nServiceSchema(s: N8nService, path: string) {
+  return {
+    '@type': 'Service', '@id': abs(`${path}#service`), name: s.title, url: abs(path),
+    description: s.description ?? s.short, serviceType: 'Автоматизация бизнес-процессов на n8n',
+    provider: { '@id': ids.business }, areaServed: { '@type': 'Country', name: 'Россия' },
+    offers: s.price != null ? {
+      '@type': 'Offer', priceCurrency: 'RUB', url: abs(path),
+      priceSpecification: { '@type': 'PriceSpecification', minPrice: s.price, priceCurrency: 'RUB' },
+    } : undefined,
   };
 }

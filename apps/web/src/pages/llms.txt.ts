@@ -1,10 +1,11 @@
 // llms.txt: краткое описание сайта для языковых моделей (https://llmstxt.org).
 import type { APIRoute } from 'astro';
-import { getAbout, getCases, getGlobal, getServices } from '../lib/strapi';
+import { getAbout, getCases, getGlobal, getN8nPage, getN8nServices, getServices } from '../lib/strapi';
+import { N8N_PATH, formatDuration, formatPrice, groupByCategory } from '../lib/n8n';
 
 export const GET: APIRoute = async ({ site }) => {
   const base = (site?.href ?? '').replace(/\/$/, '');
-  const [g, services, cases, about] = await Promise.all([getGlobal(), getServices(), getCases(), getAbout()]);
+  const [g, services, cases, about, n8nPage, n8n] = await Promise.all([getGlobal(), getServices(), getCases(), getAbout(), getN8nPage(), getN8nServices()]);
   const out: string[] = [
     `# ${g.siteName}`,
     '',
@@ -19,6 +20,16 @@ export const GET: APIRoute = async ({ site }) => {
     '',
     ...services.map((s) => `- [${s.title}](${base}/services/${s.slug}/): ${s.short}${s.priceFrom ? ` Стоимость ${s.priceFrom}` : ''}${s.duration ? `, срок ${s.duration}` : ''}.`),
     '',
+    `## ${n8nPage.title}`,
+    '',
+    `Каталог: ${base}${N8N_PATH}`,
+    '',
+    ...groupByCategory(n8n).flatMap((grp) => [
+      `### ${grp.label}`,
+      '',
+      ...grp.items.map((s) => `- [${s.title}](${base}${N8N_PATH}${s.slug}/): ${s.short}${formatPrice(s) ? ` Стоимость ${formatPrice(s)}` : ''}${formatDuration(s.duration) ? `, срок ${formatDuration(s.duration)}` : ''}.`),
+      '',
+    ]),
     '## Кейсы',
     '',
     ...cases.map((c) => `- [${c.title}](${base}/cases/${c.slug}/): ${c.summary}${c.metrics?.length ? ` Результат: ${c.metrics.map((m) => `${m.value} ${m.label}`).join(', ')}.` : ''}`),
