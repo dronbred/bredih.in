@@ -1,8 +1,9 @@
 ---
 import Base from '../../../layouts/Base.astro';
-import N8nServiceList from '../../../components/N8nServiceList.astro';
+import N8nServiceCards from '../../../components/N8nServiceCards.astro';
+import N8nCover from '../../../components/N8nCover.astro';
 import CtaSection from '../../../components/CtaSection.astro';
-import { getGlobal, getN8nPage, getN8nServices } from '../../../lib/strapi';
+import { getGlobal, getN8nPage, getN8nServices, mediaUrl } from '../../../lib/strapi';
 import type { Item, N8nService } from '../../../lib/types';
 import { N8N_PARENT_SLUG, N8N_PATH, formatDuration, formatPrice } from '../../../lib/n8n';
 import { breadcrumbs, faqPage, n8nServiceSchema } from '../../../lib/schema';
@@ -17,8 +18,8 @@ const path = `${N8N_PATH}${s.slug}/`;
 const price = formatPrice(s);
 const duration = formatDuration(s.duration);
 const steps = s.steps?.length ? s.steps : page.steps ?? [];
-// Сначала услуги той же категории, затем остальные, не больше четырёх
-const related = [...all.filter((x) => x.slug !== s.slug && x.category === s.category), ...all.filter((x) => x.category !== s.category)].slice(0, 4);
+// Сначала услуги той же категории, затем остальные, не больше трёх
+const related = [...all.filter((x) => x.slug !== s.slug && x.category === s.category), ...all.filter((x) => x.category !== s.category)].slice(0, 3);
 
 const blocks: { title: string; items?: Item[]; tone: 'done' | 'muted' }[] = [
   { title: 'Что входит', items: s.includes, tone: 'done' },
@@ -27,12 +28,12 @@ const blocks: { title: string; items?: Item[]; tone: 'done' | 'muted' }[] = [
   { title: 'Не входит в стоимость', items: s.excludes, tone: 'muted' },
 ];
 const schema = [
-  n8nServiceSchema(s, path),
+  n8nServiceSchema(s, path, mediaUrl(s.cover?.url)),
   breadcrumbs([{ name: 'Услуги', path: '/services/' }, { name: page.title, path: N8N_PATH }, { name: s.title, path }]),
   ...(s.faq?.length ? [faqPage(s.faq)] : []),
 ];
 ---
-<Base title={s.seo?.metaTitle ?? `${s.title} на n8n`} description={s.seo?.metaDescription ?? s.short} schema={schema}>
+<Base title={s.seo?.metaTitle ?? `${s.title} на n8n`} description={s.seo?.metaDescription ?? s.short} image={mediaUrl(s.cover?.url)} schema={schema}>
   <section class="section-y pb-10 sm:pb-14">
     <div class="container-x">
       <nav aria-label="Навигация" class="flex flex-wrap gap-x-2 text-[0.9375rem] text-ink-soft">
@@ -40,19 +41,22 @@ const schema = [
         <span aria-hidden="true">/</span>
         <a href={N8N_PATH} class="hover:text-ink">{page.title}</a>
       </nav>
-      <div class="mt-4 grid gap-10 lg:grid-cols-[1.6fr_1fr] lg:items-end">
+      <div class="mt-4 grid gap-10 lg:grid-cols-[1.5fr_1fr] lg:items-start">
         <div>
           <h1>{s.title}</h1>
           <p class="lede measure mt-6">{s.description ?? s.short}</p>
         </div>
-        <div class="border-t-[1.5px] border-ink pt-5">
-          <dl class="grid grid-cols-2 gap-6 lg:grid-cols-1 lg:gap-4">
-            {price && <div><dt class="text-[0.9375rem] text-ink-soft">Стоимость</dt><dd class="font-display text-2xl font-semibold">{price}</dd></div>}
-            {duration && <div><dt class="text-[0.9375rem] text-ink-soft">Срок</dt><dd class="font-display text-2xl font-semibold">{duration}</dd></div>}
-          </dl>
-          <div class="mt-6 flex flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row">
-            <a href={g.telegram} target="_blank" rel="noopener" class="btn-primary">Обсудить в Telegram</a>
-            <a href="#contact" class="btn-quiet">Оставить заявку</a>
+        <div class="grid gap-6">
+          <N8nCover service={s} size="hero" eager />
+          <div class="border-t-[1.5px] border-ink pt-5">
+            <dl class="grid grid-cols-2 gap-6">
+              {price && <div><dt class="text-[0.9375rem] text-ink-soft">Стоимость</dt><dd class="font-display text-xl font-semibold sm:text-2xl">{price}</dd></div>}
+              {duration && <div><dt class="text-[0.9375rem] text-ink-soft">Срок</dt><dd class="font-display text-xl font-semibold sm:text-2xl">{duration}</dd></div>}
+            </dl>
+            <div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+              <a href={g.telegram} target="_blank" rel="noopener" class="btn-primary whitespace-nowrap">Обсудить в Telegram</a>
+              <a href="#contact" class="btn-quiet whitespace-nowrap">Оставить заявку</a>
+            </div>
           </div>
         </div>
       </div>
@@ -122,7 +126,7 @@ const schema = [
           <h2>Другие услуги на n8n</h2>
           <a href={N8N_PATH} class="link">Все услуги</a>
         </div>
-        <div class="mt-8"><N8nServiceList services={related} /></div>
+        <div class="mt-8 border-t-[1.5px] border-ink pt-8"><N8nServiceCards services={related} /></div>
       </div>
     </section>
   )}

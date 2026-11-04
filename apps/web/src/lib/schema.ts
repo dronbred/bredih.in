@@ -76,9 +76,9 @@ export function caseSchema(c: Case, image?: string) {
   };
 }
 
-export function n8nServiceSchema(s: N8nService, path: string) {
+export function n8nServiceSchema(s: N8nService, path: string, image?: string) {
   return {
-    '@type': 'Service', '@id': abs(`${path}#service`), name: s.title, url: abs(path),
+    '@type': 'Service', '@id': abs(`${path}#service`), name: s.title, url: abs(path), image,
     description: s.description ?? s.short, serviceType: 'Автоматизация бизнес-процессов на n8n',
     provider: { '@id': ids.business }, areaServed: { '@type': 'Country', name: 'Россия' },
     offers: s.price != null ? {
