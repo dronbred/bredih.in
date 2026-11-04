@@ -1,0 +1,25 @@
+---
+import Base from '../layouts/Base.astro';
+import CtaSection from '../components/CtaSection.astro';
+import { getAbout, getHome, mediaUrl } from '../lib/strapi';
+const [about, home] = await Promise.all([getAbout(), getHome()]);
+const photo = mediaUrl(about.photo?.url);
+---
+<Base title={about.title}>
+  <section class="section">
+    <div class="container-x grid items-start gap-10 md:grid-cols-[1fr_1.5fr]">
+      <div class="aspect-[4/5] overflow-hidden rounded-3xl bg-gradient-to-br from-brand-100 to-brand-50">
+        {photo && <img src={photo} alt="Андрей Бредихин" class="size-full object-cover" />}
+      </div>
+      <div>
+        <h1>{about.title}</h1>
+        <div class="prose-x mt-6 text-lg">{about.text.split('\n').filter(Boolean).map((p) => <p>{p}</p>)}</div>
+        <dl class="mt-10 grid grid-cols-3 gap-4">
+          {about.facts.map((f) => <div><dd class="text-3xl font-bold text-brand-600 sm:text-4xl">{f.value}</dd><dt class="text-sm text-muted">{f.label}</dt></div>)}
+        </dl>
+        <ul class="mt-10 flex flex-wrap gap-2">{home.technologies.map((t) => <li class="rounded-full border border-line px-3 py-1">{t}</li>)}</ul>
+      </div>
+    </div>
+  </section>
+  <CtaSection />
+</Base>

@@ -1,0 +1,17 @@
+{
+  "collectionName": "components_shared_items",
+  "info": {
+    "displayName": "Пункт",
+    "icon": "bulletList"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "text": {
+      "type": "text"
+    }
+  }
+}

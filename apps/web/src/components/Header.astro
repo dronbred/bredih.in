@@ -1,0 +1,39 @@
+---
+interface Props { siteName: string; telegram: string }
+const { siteName, telegram } = Astro.props;
+const nav = [
+  { href: '/services/', label: 'Услуги' },
+  { href: '/cases/', label: 'Кейсы' },
+  { href: '/about/', label: 'Обо мне' },
+  { href: '/contacts/', label: 'Контакты' },
+];
+const path = Astro.url.pathname;
+---
+<header class="sticky top-0 z-50 border-b border-line/70 bg-white/85 backdrop-blur">
+  <div class="container-x flex h-16 items-center justify-between gap-4">
+    <a href="/" class="text-lg font-bold">{siteName}</a>
+    <nav class="hidden items-center gap-8 md:flex" aria-label="Основное меню">
+      {nav.map((n) => (
+        <a href={n.href} class:list={['font-medium transition hover:text-brand-600', path.startsWith(n.href) && 'text-brand-600']}>{n.label}</a>
+      ))}
+      <a href={telegram} class="btn-primary !py-2" target="_blank" rel="noopener">Написать</a>
+    </nav>
+    <button id="menu-btn" class="grid size-11 place-items-center rounded-lg md:hidden" aria-label="Открыть меню" aria-expanded="false" aria-controls="mobile-menu">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+    </button>
+  </div>
+  <nav id="mobile-menu" class="hidden border-t border-line bg-white md:hidden" aria-label="Мобильное меню">
+    <div class="container-x flex flex-col py-3">
+      {nav.map((n) => <a href={n.href} class="py-3 text-lg font-medium">{n.label}</a>)}
+      <a href={telegram} class="btn-primary my-3" target="_blank" rel="noopener">Написать в Telegram</a>
+    </div>
+  </nav>
+</header>
+<script>
+  const btn = document.getElementById('menu-btn');
+  const menu = document.getElementById('mobile-menu');
+  btn?.addEventListener('click', () => {
+    const open = menu?.classList.toggle('hidden') === false;
+    btn.setAttribute('aria-expanded', String(open));
+  });
+</script>

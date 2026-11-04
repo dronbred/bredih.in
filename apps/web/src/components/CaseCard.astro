@@ -1,0 +1,18 @@
+---
+import type { Case } from '../lib/types';
+import { mediaUrl } from '../lib/strapi';
+interface Props { item: Case }
+const { item: c } = Astro.props;
+const cover = mediaUrl(c.cover?.url);
+---
+<a href={`/cases/${c.slug}/`} class="card group flex flex-col overflow-hidden !p-0">
+  <div class="aspect-[16/10] bg-gradient-to-br from-brand-100 to-brand-50">
+    {cover && <img src={cover} alt={c.cover?.alternativeText ?? c.title} loading="lazy" class="size-full object-cover" />}
+  </div>
+  <div class="flex flex-1 flex-col p-6">
+    {c.services?.[0] && <p class="eyebrow">{c.services[0].title}</p>}
+    <h3 class="mt-2 group-hover:text-brand-600">{c.title}</h3>
+    <p class="mt-2 flex-1 text-muted">{c.summary}</p>
+    {c.stack && <p class="mt-4 flex flex-wrap gap-2">{c.stack.map((t) => <span class="rounded-full bg-surface px-3 py-1 text-sm">{t}</span>)}</p>}
+  </div>
+</a>

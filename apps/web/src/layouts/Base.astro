@@ -1,0 +1,37 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { getGlobal, mediaUrl } from '../lib/strapi';
+
+interface Props { title?: string; description?: string; image?: string }
+const g = await getGlobal();
+const { title, description = g.seo.metaDescription, image } = Astro.props;
+const fullTitle = title ? `${title} — ${g.siteName}` : (g.seo.metaTitle ?? g.siteName);
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = image ?? mediaUrl(g.seo.shareImage?.url);
+---
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    {description && <meta name="description" content={description} />}
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fullTitle} />
+    {description && <meta property="og:description" content={description} />}
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta name="theme-color" content="#4f46e5" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  </head>
+  <body class="flex min-h-dvh flex-col">
+    <Header siteName={g.siteName} telegram={g.telegram} />
+    <main class="flex-1"><slot /></main>
+    <Footer global={g} />
+  </body>
+</html>

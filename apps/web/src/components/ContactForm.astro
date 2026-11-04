@@ -1,0 +1,54 @@
+---
+import type { Service } from '../lib/types';
+interface Props { services: Service[]; selected?: string }
+const { services, selected } = Astro.props;
+const endpoint = `${(import.meta.env.PUBLIC_STRAPI_URL ?? '').replace(/\/$/, '')}/api/leads`;
+---
+<form id="lead-form" data-endpoint={endpoint} class="grid gap-4 rounded-2xl border border-line bg-white p-6 sm:p-8">
+  <div class="grid gap-4 sm:grid-cols-2">
+    <label class="grid gap-1.5"><span class="text-sm font-medium">Имя</span>
+      <input name="name" required autocomplete="name" class="field" /></label>
+    <label class="grid gap-1.5"><span class="text-sm font-medium">Telegram, телефон или почта</span>
+      <input name="contact" required class="field" /></label>
+  </div>
+  <label class="grid gap-1.5"><span class="text-sm font-medium">Услуга</span>
+    <select name="service" class="field">
+      <option value="">Пока не знаю</option>
+      {services.map((s) => <option value={s.slug} selected={s.slug === selected}>{s.title}</option>)}
+    </select></label>
+  <label class="grid gap-1.5"><span class="text-sm font-medium">Коротко о задаче</span>
+    <textarea name="message" rows="4" class="field"></textarea></label>
+  <input type="text" name="website" class="hidden" tabindex="-1" autocomplete="off" aria-hidden="true" />
+  <label class="flex items-start gap-3 text-sm text-muted">
+    <input type="checkbox" required class="mt-1 size-4 accent-brand-600" />
+    <span>Соглашаюсь на обработку персональных данных согласно <a href="/privacy/" class="underline">политике конфиденциальности</a></span>
+  </label>
+  <button class="btn-primary sm:justify-self-start" type="submit">Отправить заявку</button>
+  <p id="lead-status" class="text-sm" role="status"></p>
+</form>
+<script>
+  const form = document.getElementById('lead-form') as HTMLFormElement | null;
+  const status = document.getElementById('lead-status');
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(form)) as Record<string, string>;
+    if (data.website) return; // ловушка для спам-ботов
+    delete data.website;
+    const btn = form.querySelector('button');
+    btn?.setAttribute('disabled', '');
+    try {
+      const res = await fetch(form.dataset.endpoint!, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: { ...data, page: location.pathname } }),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      form.reset();
+      if (status) { status.textContent = 'Спасибо! Заявка отправлена, отвечу в течение дня.'; status.className = 'text-sm text-green-700'; }
+    } catch {
+      if (status) { status.textContent = 'Не получилось отправить. Напишите мне в Telegram, пожалуйста.'; status.className = 'text-sm text-red-600'; }
+    } finally {
+      btn?.removeAttribute('disabled');
+    }
+  });
+</script>

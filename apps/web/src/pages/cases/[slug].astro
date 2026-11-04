@@ -1,0 +1,40 @@
+---
+import Base from '../../layouts/Base.astro';
+import CtaSection from '../../components/CtaSection.astro';
+import { getCases, mediaUrl } from '../../lib/strapi';
+import type { Case } from '../../lib/types';
+
+export async function getStaticPaths() {
+  const cases = await getCases();
+  return cases.map((item) => ({ params: { slug: item.slug }, props: { item } }));
+}
+const { item: c } = Astro.props as { item: Case };
+const cover = mediaUrl(c.cover?.url);
+const blocks = [
+  { title: 'Задача', text: c.task },
+  { title: 'Решение', text: c.solution },
+  { title: 'Результат', text: c.result },
+].filter((b) => b.text);
+---
+<Base title={c.seo?.metaTitle ?? c.title} description={c.seo?.metaDescription ?? c.summary} image={cover}>
+  <article class="section">
+    <div class="container-x max-w-4xl">
+      <a href="/cases/" class="text-sm text-muted hover:text-brand-600">← Все кейсы</a>
+      {c.client && <p class="eyebrow mt-6">{c.client}</p>}
+      <h1 class="mt-3">{c.title}</h1>
+      <p class="mt-6 text-lg text-muted">{c.summary}</p>
+      {(c.metrics?.length ?? 0) > 0 && (
+        <dl class="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3">
+          {c.metrics.map((m) => <div class="rounded-2xl bg-brand-50 p-5"><dt class="text-sm text-muted">{m.label}</dt><dd class="text-3xl font-bold text-brand-700">{m.value}</dd></div>)}
+        </dl>
+      )}
+      {cover && <img src={cover} alt={c.cover?.alternativeText ?? c.title} class="mt-10 w-full rounded-2xl" />}
+      <div class="mt-10 grid gap-8">
+        {blocks.map((b) => <section><h2 class="!text-2xl">{b.title}</h2><p class="mt-3 text-lg">{b.text}</p></section>)}
+      </div>
+      {(c.stack?.length ?? 0) > 0 && <p class="mt-10 flex flex-wrap gap-2">{c.stack.map((t) => <span class="rounded-full bg-surface px-3 py-1">{t}</span>)}</p>}
+      {c.link && <a href={c.link} class="btn-ghost mt-8" target="_blank" rel="noopener">Открыть проект ↗</a>}
+    </div>
+  </article>
+  <CtaSection title="Нужно похожее решение?" selected={c.services?.[0]?.slug} />
+</Base>

@@ -1,0 +1,14 @@
+---
+import Base from '../layouts/Base.astro';
+import { getGlobal } from '../lib/strapi';
+const g = await getGlobal();
+---
+<Base title="Политика конфиденциальности">
+  <section class="section">
+    <div class="container-x prose-x max-w-3xl">
+      <h1>Политика конфиденциальности</h1>
+      <p class="mt-6">Черновик. Текст политики обработки персональных данных (152-ФЗ) нужно подготовить и согласовать перед запуском.</p>
+      <p>Оператор: {g.siteName}. Связь: <a href={`mailto:${g.email}`} class="underline">{g.email}</a>.</p>
+    </div>
+  </section>
+</Base>

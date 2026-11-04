@@ -1,0 +1,70 @@
+---
+import Base from '../../layouts/Base.astro';
+import CaseCard from '../../components/CaseCard.astro';
+import CtaSection from '../../components/CtaSection.astro';
+import { getCases, getServices } from '../../lib/strapi';
+import type { Service } from '../../lib/types';
+
+export async function getStaticPaths() {
+  const services = await getServices();
+  return services.map((service) => ({ params: { slug: service.slug }, props: { service } }));
+}
+const { service: s } = Astro.props as { service: Service };
+const related = (s.cases?.length ? s.cases : (await getCases()).filter((c) => c.services?.some((x) => x.slug === s.slug)));
+---
+<Base title={s.seo?.metaTitle ?? s.title} description={s.seo?.metaDescription ?? s.short}>
+  <section class="section">
+    <div class="container-x grid gap-10 lg:grid-cols-[1.5fr_1fr]">
+      <div>
+        <a href="/services/" class="text-sm text-muted hover:text-brand-600">← Все услуги</a>
+        <h1 class="mt-4">{s.title}</h1>
+        <p class="mt-6 text-lg text-muted">{s.description ?? s.short}</p>
+      </div>
+      {(s.priceFrom || s.duration) && (
+        <aside class="h-fit rounded-2xl border border-line bg-surface p-6">
+          {s.priceFrom && <p><span class="text-sm text-muted">Стоимость</span><br /><b class="text-2xl">{s.priceFrom}</b></p>}
+          {s.duration && <p class="mt-4"><span class="text-sm text-muted">Срок</span><br /><b class="text-xl">{s.duration}</b></p>}
+          <a href="#contact" class="btn-primary mt-6 w-full">Обсудить задачу</a>
+        </aside>
+      )}
+    </div>
+  </section>
+
+  {(s.features?.length ?? 0) > 0 && (
+    <section class="section pt-0">
+      <div class="container-x">
+        <h2>Что входит</h2>
+        <ul class="mt-8 grid gap-4 sm:grid-cols-2">
+          {s.features.map((f) => <li class="rounded-2xl border border-line p-5"><b>✓ {f.title}</b>{f.text && <p class="mt-1 text-muted">{f.text}</p>}</li>)}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  {related.length > 0 && (
+    <section class="section bg-surface">
+      <div class="container-x">
+        <h2>Кейсы</h2>
+        <div class="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">{related.map((c) => <CaseCard item={c} />)}</div>
+      </div>
+    </section>
+  )}
+
+  {(s.faq?.length ?? 0) > 0 && (
+    <section class="section">
+      <div class="container-x max-w-3xl">
+        <h2>Частые вопросы</h2>
+        <div class="mt-8 divide-y divide-line border-y border-line">
+          {s.faq.map((q) => (
+            <details class="group py-5">
+              <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold">{q.question}<span class="transition group-open:rotate-45">+</span></summary>
+              <p class="mt-3 text-muted">{q.answer}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <CtaSection selected={s.slug} />
+</Base>
